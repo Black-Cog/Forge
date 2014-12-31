@@ -10,11 +10,11 @@ class Database(object):
 
 	@staticmethod
 	def conection( addr=None, username=None, password=None, dbname=None ):
-		""" Return methode doc """
-		'@parameter string addr All of the element in the rib.'
-		'@parameter string username All of the element in the rib.'
-		'@parameter string password All of the element in the rib.'
-		'@parameter string dbname All of the element in the rib.'
+		""" Method for conection to Mysql database """
+		'@parameter string addr Address of the Mysql server.'
+		'@parameter string username Username of the database.'
+		'@parameter string password Password of the user.'
+		'@parameter string dbname Name of the database.'
 
 	@staticmethod
 	def insert():
