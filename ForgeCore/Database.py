@@ -1,8 +1,11 @@
+import sys, os
+import MySQLdb as mdb
 
 class Database(object):
 	"""Methodes for Database managment"""
 	def __init__( self ):
 		self.foo = ''
+		self.globalcon = ''
 	
 	def verbose( self ):
 		print self.foo
@@ -16,14 +19,36 @@ class Database(object):
 		'@parameter string password Password of the user.'
 		'@parameter string dbname Name of the database.'
 
+		global globalcon
+		globalcon = mdb.connect(addr, username, password, dbname);
+
 	@staticmethod
 	def insert():
 		"""  """
 
 	@staticmethod
-	def select():
-		"""  """
-		return
+	def select( fields=None, tables=None, Condition=None):
+		""" Method for select and retrive database recordings """
+		'@parameter string fields fields to be retrived.'
+		'@parameter string tables tables where to look.'
+		'@parameter string Condition Condition WHERE to filter result.'
+
+		global globalcon 
+		cur = globalcon.cursor()
+		require = 'SELECT '
+		require += fields
+		require += ' FROM '
+		require += tables
+		if Condition != None:
+			require += ' WHERE '+Condition
+		#cur.execute("SELECT "+fields+" FROM "+tables)
+		cur.execute(require)
+		rows = cur.fetchall()
+		result = ''
+		for row in rows:
+			result += ''.join(row)
+
+		return result
 
 	@staticmethod
 	def update():
@@ -48,7 +73,3 @@ class Database(object):
 		helpString += '\n     - string dbname All of the element in the rib.'
 
 		return helpString
-
-
-
-
