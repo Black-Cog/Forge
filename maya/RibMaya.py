@@ -223,7 +223,7 @@ def writeObjectRib( shapeNode ):
 	rib.write( '\n' )
 	rib.close()
 
-writeObjectRib( 'pSphereShape1' )
+# writeObjectRib( 'pSphereShape1' )
 
 # TODO fix st problem
 def writeObjectSubdivRib( shapeNode ):
@@ -350,7 +350,7 @@ def writeObjectSubdivRib( shapeNode ):
 	rib.write( '\n' )
 	rib.close()
 
-writeObjectSubdivRib( 'pSphereShape1' )
+# writeObjectSubdivRib( 'pSphereShape1' )
 
 
 
@@ -366,3 +366,4 @@ for i in maya.cmds.polyInfo( fv=True ):
 				if bool == True : print round(1-k, 8)
 				else : print round(k, 8)
 				bool = True
+'''
