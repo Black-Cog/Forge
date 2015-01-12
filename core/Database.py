@@ -2,6 +2,7 @@ import MySQLdb
 
 
 class Database(object):
+    """Methodes for Database managment"""
 
     def connection(self, addr=None, username=None, password=None, dbname=None):
         """ Method for connection to Mysql database """
