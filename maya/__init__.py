@@ -1,4 +1,3 @@
-
 from RibMaya import RibMaya
 
 def help():
@@ -7,7 +6,3 @@ def help():
 	helpString += '\n - RibMaya() : Methodes for Rib managment in Maya.'
 
 	return helpString
-
-
-foo = RibMaya()
-foo.verbose()
