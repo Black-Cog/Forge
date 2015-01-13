@@ -2,7 +2,6 @@ import MySQLdb
 
 
 class Database(object):
-    """Methodes for Database managment"""
 
     def connection(self, addr=None, username=None, password=None, dbname=None):
         """ Method for connection to Mysql database """
@@ -16,11 +15,11 @@ class Database(object):
 
     def insert(self, fields=None, tables=None):
         """ Method for insert database recordings """
-        ':param fields: list trio value in sub list with '
-        '0 => Field name'
-        '1 => Data format (declare here Mysql functions like for example md5 should be MD5(...) )'
-        '2 => Content data'
-        ':param tables: Name of the table(s)'
+        '@parameter list fields List trio value in sub list with : '
+            '0 => Field name'
+            '1 => Data format (declare here Mysql functions like for example md5 should be MD5(...) )'
+            '2 => Content data'
+        '@parameter string tables Name of the table(s)'
 
         #recovery of the values
         querryData = []
@@ -45,36 +44,32 @@ class Database(object):
         return result
         
 
-    def select(self, fields=None, tables=None, Condition=None):
+    def select(self, fields=None, tables=None, condition=None, conditionData=None):
         """ Method for select and retrive database recordings """
-        '@parameter string fields fields to be retrived.'
-        '@parameter string tables tables where to look.'
-        '@parameter string Condition Condition WHERE to filter result.'
+        '@parameter string fields Fields to be retrived.'
+        '@parameter string tables Tables where to look.'
+        '@parameter string condition Condition WHERE to filter result.'
+        '@parameter list ConditionData.'
+        
 
         cur = self.globalcon.cursor()
         require = 'SELECT '
         require += fields
         require += ' FROM '
         require += tables
-        if Condition != None:
-            require += ' WHERE ' + Condition
-        cur.execute(require)
+        if condition != None: require += ' WHERE ' + condition # adding WHERE clause
+        cur.execute(require, conditionData) if conditionData != None else cur.execute(require) # If presents, data linked to the condition are added to the request
         rows = cur.fetchall()
-
-        listResult = []  # Creation of the empty result list
-        for row in rows:
-            listResult.append(list(row))
-
-        return listResult
+        return list(rows)
 
     def update(self, fields=None, tables=None, Condition=None):
         """ Method for select and retrive database recordings """
-        ':param fieldsList: list trio value in sub list with '
-        '0 => Field name'
-        '1 => Data format (declare here Mysql functions like for example md5 should be MD5(...) )'
-        '2 => Content data'
-        ':param tables: Name of the table(s)'
-        ':param condition: Condition of the update'
+        '@parameter list fields List trio value in sub list with : '
+            '0 => Field name'
+            '1 => Data format (declare here Mysql functions like for example md5 should be MD5(...) )'
+            '2 => Content data'
+        '@parameter string tables Name of the table(s)'
+        '@parameter string condition Condition of the update'
 
         # recovery of the fields names and the data type and formating the list
         fieldList = ''
@@ -83,13 +78,16 @@ class Database(object):
 
         # Create the update value list
         values = []
-        for field in fields: values.append(field[2])
+        for field in fields: 
+            if field[2]!= None:
+                values.append(field[2])
 
         # Fill the condition value if undefined
         if Condition == None: Condition='1'        
         
         # Create the querry and execute it
         require = 'UPDATE %s SET %s WHERE %s' % (tables, fieldList, Condition)
+        print require
         cur = self.globalcon.cursor()
         result = cur.execute(require, values)
         self.globalcon.commit()
@@ -98,8 +96,8 @@ class Database(object):
 
     def delete(self, tables=None, condition=None):
         """ Method for deleting recordings (lines) from the database """
-        ':param tables: Name of the table(s)'
-        ':param condition: Condition of the deletion'
+        '@parameter string tables: Name of the table(s)'
+        '@parameter string condition: Condition of the deletion'
         ':if success return the number of rows deleted'
 
         # Create the querry and execute it
