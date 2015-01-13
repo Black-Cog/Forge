@@ -2,6 +2,7 @@ import MySQLdb
 
 
 class Database(object):
+    """Methodes for Database managment"""
 
     def connection(self, addr=None, username=None, password=None, dbname=None):
         """ Method for connection to Mysql database """
@@ -87,7 +88,6 @@ class Database(object):
         
         # Create the querry and execute it
         require = 'UPDATE %s SET %s WHERE %s' % (tables, fieldList, Condition)
-        print require
         cur = self.globalcon.cursor()
         result = cur.execute(require, values)
         self.globalcon.commit()
