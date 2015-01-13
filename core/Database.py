@@ -17,9 +17,9 @@ class Database(object):
     def insert(self, fields=None, tables=None):
         """ Method for insert database recordings """
         '@parameter list fields List trio value in sub list with : '
-            '0 => Field name'
-            '1 => Data format (declare here Mysql functions like for example md5 should be MD5(...) )'
-            '2 => Content data'
+        '0 => Field name'
+        '1 => Data format (declare here Mysql functions like for example md5 should be MD5(...) )'
+        '2 => Content data' 
         '@parameter string tables Name of the table(s)'
 
         #recovery of the values
@@ -66,9 +66,9 @@ class Database(object):
     def update(self, fields=None, tables=None, Condition=None):
         """ Method for select and retrive database recordings """
         '@parameter list fields List trio value in sub list with : '
-            '0 => Field name'
-            '1 => Data format (declare here Mysql functions like for example md5 should be MD5(...) )'
-            '2 => Content data'
+        '0 => Field name'
+        '1 => Data format (declare here Mysql functions like for example md5 should be MD5(...) )'
+        '2 => Content data'
         '@parameter string tables Name of the table(s)'
         '@parameter string condition Condition of the update'
 
