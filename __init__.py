@@ -2,4 +2,4 @@
 import core
 
 # if maya as interpreter load maya lib
-if core.Python().interpreter() == 'maya'  : import maya
+if core.System().interpreter() == 'maya'  : import maya
