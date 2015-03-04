@@ -3,6 +3,7 @@ from Rib import Rib
 from System import System
 from Process import Process
 from Database import Database
+from Color import Color
 
 def help():
 	"""Return string the help of the module ForgeCore"""

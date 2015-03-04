@@ -1,5 +1,6 @@
 import os
 import sys
+import shutil
 
 class System(object):
 	"""Methodes for System managment"""
@@ -57,6 +58,17 @@ class System(object):
 				returnList.append(i)
 
 		return returnList
+
+	@staticmethod
+	def cleanFolder( path=None ):
+
+		if os.path.exists( path ):
+			for i in os.listdir( path ):
+
+				tmpItem = '%s/%s' %( path, i )
+
+				if os.path.isfile( tmpItem ) : os.remove( tmpItem )
+				elif os.path.isdir( tmpItem ) : shutil.rmtree( tmpItem )
 
 	@staticmethod
 	def help():
