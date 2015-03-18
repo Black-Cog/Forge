@@ -4,6 +4,13 @@ import MySQLdb
 class Database(object):
     """Methodes for Database managment"""
 
+    @staticmethod
+    def dbinfo():
+        """ Method for storing connection info to Mysql database """
+
+        result = {'addr':'127.0.0.1', 'username':'root', 'password':'', 'dbname':'bc_forge'}
+        return result
+
     def connection(self, addr=None, username=None, password=None, dbname=None):
         """ Method for connection to Mysql database """
         '@parameter string addr Address of the Mysql server.'
@@ -59,17 +66,52 @@ class Database(object):
         require += tables
         if condition != None: require += ' WHERE ' + condition # adding WHERE clause
         cur.execute(require, conditionData) if conditionData != None else cur.execute(require) # If presents, data linked to the condition are added to the request
-        rows = cur.fetchall()
-        return list(rows)
+        
+        rows = [list(i) for i in list(cur.fetchall())] # list of lists
 
-    def update(self, fields=None, tables=None, Condition=None):
+        fullInfo = []
+        description = list(cur.description)
+
+        desclenght = len(description)
+        fieldsNames = [ i[0] for i in description ]
+        result = []
+        for i in range(len(rows)):
+            subresult = []
+            for f, b in zip(rows[i], fieldsNames):
+                subresult.append({b : f})
+            result.append(subresult)
+        return result
+
+    def formatSelect(self, fullInfo, typeReturn):
+
+        if typeReturn == 'list':
+            result = []
+            listResult = []
+            for i in range(len(fullInfo)):
+                for j in fullInfo[i]:
+                    for k,v in j.iteritems():
+                        listResult.append(v)
+            result.append(listResult)
+
+        return result
+    def getColumnName(self, baseName, tableName):
+        """ Method for retrive table """
+        '@parameter : '
+        '0 => baseName'
+        '1 => tableName'
+        conditionData = [baseName, tableName]
+        userSelect = self.select('COLUMN_NAME', '`INFORMATION_SCHEMA`.`COLUMNS`', '`TABLE_SCHEMA`=%s AND `TABLE_NAME`=%s', conditionData)
+        result = [ userSelect[i][0]['COLUMN_NAME'] for i in range(len(userSelect)) ]
+        return result
+
+    def update(self, fields=None, tables=None, condition=None):
         """ Method for select and retrive database recordings """
         '@parameter list fields List trio value in sub list with : '
         '0 => Field name'
         '1 => Data format (declare here Mysql functions like for example md5 should be MD5(...) )'
         '2 => Content data'
         '@parameter string tables Name of the table(s)'
-        '@parameter string condition Condition of the update'
+        '@parameter string condition condition of the update'
 
         # recovery of the fields names and the data type and formating the list
         fieldList = ''
@@ -83,10 +125,10 @@ class Database(object):
                 values.append(field[2])
 
         # Fill the condition value if undefined
-        if Condition == None: Condition='1'        
+        if condition == None: condition='1'        
         
         # Create the querry and execute it
-        require = 'UPDATE %s SET %s WHERE %s' % (tables, fieldList, Condition)
+        require = 'UPDATE %s SET %s WHERE %s' % (tables, fieldList, condition)
         cur = self.globalcon.cursor()
         result = cur.execute(require, values)
         self.globalcon.commit()
