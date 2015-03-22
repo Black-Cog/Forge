@@ -25,7 +25,7 @@ forgePatchVersion     = 1 # bug fixes
 
 
 softwareEnvironment = 'f:/software/'
-softwareName = 'forge_%s.%s.%s.%sdev' %( forgeMilestoneVersion, forgeMajorVersion, forgeMinorVersion, forgePatchVersion )
+softwareName = 'forge_%s.%s.%s.%sdev/%s' %( forgeMilestoneVersion, forgeMajorVersion, forgeMinorVersion, forgePatchVersion, 'Forge' )
 softwarePath = '%s%s/' %( softwareEnvironment, softwareName )
 
 
