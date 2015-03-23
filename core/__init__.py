@@ -3,7 +3,15 @@ from Rib import Rib
 from System import System
 from Process import Process
 from Database import Database
+
+# datas
+from Bool import Bool
+from Int import Int
+from Float import Float
 from Color import Color
+from String import String
+from Array import Array
+from Compound import Compound
 
 def help():
 	"""Return string the help of the module ForgeCore"""
