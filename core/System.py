@@ -8,8 +8,8 @@ class System(object):
 	@staticmethod
 	def interpreter():
 		"""Return the system interpreter."""
-		executable = sys.argv[0].replace( '\\', '/' ).split( '/' )[-1]
-		software   = executable.split( '.' )[0]
+		executable = sys.executable.replace( '\\', '/' ).split( '/' )[-1]
+		software   = executable.replace( '.exe', '' )
 
 		return software
 
