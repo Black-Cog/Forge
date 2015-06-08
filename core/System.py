@@ -79,6 +79,14 @@ class System(object):
 		return os.path.dirname( os.path.realpath(file) )
 
 	@staticmethod
+	def exists( path ):
+		return os.path.exists( path )
+
+	@staticmethod
+	def getExtension( path ):
+		return path.split( '.' )[-1]
+
+	@staticmethod
 	def help():
 		"""Return string the help of the class System"""
 		helpString  = '\n ######## class System ########'
