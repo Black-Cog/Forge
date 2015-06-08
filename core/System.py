@@ -71,6 +71,14 @@ class System(object):
 				elif os.path.isdir( tmpItem ) : shutil.rmtree( tmpItem )
 
 	@staticmethod
+	def setEnv( path ):
+		os.chdir( path )
+
+	@staticmethod
+	def getPath( file ):
+		return os.path.dirname( os.path.realpath(file) )
+
+	@staticmethod
 	def help():
 		"""Return string the help of the class System"""
 		helpString  = '\n ######## class System ########'
