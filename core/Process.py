@@ -13,7 +13,10 @@ class Process(object):
 
 	@staticmethod
 	def launchSoftware( softwarePath, arg=None ):
-		subprocess.Popen( [softwarePath, arg], creationflags=subprocess.CREATE_NEW_CONSOLE )
+		if arg:
+			subprocess.Popen( [softwarePath, arg], creationflags=subprocess.CREATE_NEW_CONSOLE )
+		else:
+			subprocess.Popen( softwarePath, creationflags=subprocess.CREATE_NEW_CONSOLE )
 
 	@staticmethod
 	def partial( func, *args, **keywords ):
