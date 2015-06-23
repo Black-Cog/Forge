@@ -2,7 +2,7 @@ import os
 import sys
 import shutil
 
-class System(object):
+class System():
 	"""Methodes for System managment"""
 
 	@staticmethod
@@ -40,6 +40,13 @@ class System(object):
 		file = open( path, type )
 		file.write( content )
 		file.close()
+
+	@staticmethod
+	def removeFile( path=None ):
+		"""Remove file."""
+		'@parameter string path Path of the removed file.'
+
+		os.remove( path )
 
 	@staticmethod
 	def list( path=None, file=True, folder=True ):
