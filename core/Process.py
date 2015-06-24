@@ -47,4 +47,4 @@ class Process():
 
 		Forge.core.System.setFile( path=path, content=cmdExec )
 
-		self.launchSoftware( Forge.core.Env().nuke, arg=path )
+		self.launchSoftware( env.nuke, arg=path )
