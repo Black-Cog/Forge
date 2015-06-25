@@ -5,8 +5,10 @@ class Env():
 	def __init__( self ):
 
 		# temp
-
 		self.tmp = 'f:/tmp/'
+
+		# data
+		self.data = 'f:/data/'
 
 		# commercial software
 		self.maya = 'c:/Program Files/Autodesk/Maya2015/bin/maya.exe'
