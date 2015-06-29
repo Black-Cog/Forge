@@ -4,11 +4,13 @@ class Env():
 
 	def __init__( self ):
 
+		self.root = 'f:/'
+
 		# temp
-		self.tmp = 'f:/tmp/'
+		self.tmp = '%stmp/' %( self.root )
 
 		# data
-		self.data = 'f:/data/'
+		self.data = '%sdata/' %( self.root )
 
 		# commercial software
 		self.maya = 'c:/Program Files/Autodesk/Maya2015/bin/maya.exe'
@@ -18,7 +20,7 @@ class Env():
 
 
 		# global software
-		self.software = 'f:/software/'
+		self.software = '%ssoftware/' %( self.root )
 
 		# library
 		self.forgeLib = '%sForge_0.0.0.1dev/' %( self.software )
