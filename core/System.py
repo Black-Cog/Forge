@@ -1,13 +1,19 @@
 import os
-import sys
-import shutil
 
 class System():
 	"""Methodes for System managment"""
 
 	@staticmethod
+	def getUserName():
+		"""Return the user name."""
+		import getpass
+		return getpass.getuser()
+
+	@staticmethod
 	def interpreter():
 		"""Return the system interpreter."""
+		import sys
+
 		executable = sys.executable.replace( '\\', '/' ).split( '/' )[-1]
 		software   = executable.replace( '.exe', '' )
 
@@ -68,6 +74,7 @@ class System():
 
 	@staticmethod
 	def cleanFolder( path=None ):
+		import shutil
 
 		if os.path.exists( path ):
 			for i in os.listdir( path ):
