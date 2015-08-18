@@ -1,0 +1,23 @@
+
+== Forge ==
+
+Forge is a library made for CG productions.
+
+=== Downloading ===
+Compiled binary releases are available for download from the https://github.com/Black-Cog/Forge/releases[releases page].
+
+=== Building ===
+
+You have to be set in a special hierarchy.
+
+/yourRootFolder/installers : where you copy the dowload from GitHub
+/yourRootFolder/env : environnement file
+/yourRootFolder/software : software and library after install
+/yourRootFolder/data : datas
+/yourRootFolder/users : users profiles
+/yourRootFolder/tmp : temp folder
+
+You need to execute this file : ./install.bat
+
+=== Copyright and License ===
+© 2014, Black Cog. © 2013, Cedric Launay under https://github.com/Black-Cog/Forge/blob/master/LICENSE[the BSD license]

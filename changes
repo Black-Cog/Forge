@@ -1,2 +1,29 @@
 
+# 0.0.0.1
+==========
 
+Requires
+-----------------------------------------------------------------------
+
+
+Core
+-----------------------------------------------------------------------
+
+- Array : Added class
+- Bool : Added class
+- Color : Added class
+- Compound : Added class
+- Database : Added class
+- Env : Added class
+- Float : Added class
+- Int : Added class
+- Process : Added class
+- Rib : Added class
+- String : Added class
+- System : Added class
+
+
+Maya
+-----------------------------------------------------------------------
+
+- RibMaya : Added class
