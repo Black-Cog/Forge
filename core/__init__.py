@@ -7,6 +7,8 @@ from Env import Env
 # from Database import Database
 from ColorScience import ColorScience
 
+import rendermanRib
+
 # datas
 from Bool import Bool
 from Int import Int

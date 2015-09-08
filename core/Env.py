@@ -16,6 +16,7 @@ class Env():
 		self.maya = 'c:/Program Files/Autodesk/Maya2015/bin/maya.exe'
 		self.nuke = 'c:/Program Files/Nuke8.0v3/Nuke8.0.exe'
 		self.renderdl = 'C:/Program Files/3Delight/bin/renderdl.exe'
+		self.localqueue = 'c:/Program Files/Pixar/RenderManStudio-20.0-maya2015/bin/LocalQueue.exe'
 		self.python = 'c:/Python27/python.exe'
 
 
