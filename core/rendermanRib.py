@@ -149,6 +149,10 @@ def writeRibPass( args, frame ):
     '@parameter frame (string) Frame to render.'
 
 
+    path = args['globals']['variables']['path']
+    sceneName = args['globals']['variables']['sceneName']
+    passName = args['globals']['variables']['passName']
+    displayType = args['globals']['variables']['displayType']
     objectSettings = args['data']['object']
 
     Filter             = args['globals']['settings']['display']['filter']
@@ -365,12 +369,20 @@ def launchRender( args ):
     #                     }
     #         }
 
+    varGlob = args['globals']['variables']
 
     # pre render
+    createRenderHierarchy( varGlob['path'], varGlob['sceneName'], varGlob['frames'] )
+    alfPath = writeAlf( varGlob['path'], varGlob['sceneName'], varGlob['passName'], varGlob['frames'], varGlob['displayType'] )
+    writeRibJob( varGlob['path'], varGlob['sceneName'] )
+    writeRibJob( varGlob['path'], varGlob['sceneName'] )
 
+    for frame in varGlob['frames']:
+        frame = str( int(varGlob['frames'][0]) ).zfill(4)
+        writeRibFrame( varGlob['path'], varGlob['sceneName'], varGlob['passName'], frame )
+        writeRlf( varGlob['path'], varGlob['sceneName'], varGlob['passName'], frame, args['rlf'] )
         writeRibPass( args, frame )
 
     # launch render
     Forge.core.Process.launchSoftware( Forge.core.Env().localqueue, [alfPath] )
-
 
