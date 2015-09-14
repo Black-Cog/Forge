@@ -340,7 +340,6 @@ def writeRibPass( args, frame ):
     passRibContent += '\n    Translate %s %s %s' %( camera_translate[0], camera_translate[1], camera_translate[2] )
 
 
-
     # world attributes
     passRibContent += '\n    Camera "world" "float[2] shutteropening" [0 1]'
     passRibContent += '\n    Option "user" "color camera_bg" [0 0 0] "float camera_bga" [0]'
@@ -368,28 +367,6 @@ def writeRibPass( args, frame ):
     passRibContent += ribGeometry( args['data']['object'] )
     passRibContent += '\n'
 
-    # passRibContent += '\n            AttributeBegin '
-    # passRibContent += '\n                Attribute "identifier" "string name" ["pSphere1"]'
-    # passRibContent += '\n                Attribute "identifier" "float id" [3]'
-    # passRibContent += '\n                ConcatTransform [ 1 0 0 0  0 1 0 0  0 0 1 0  0 0 0 1 ]'
-    # passRibContent += '\n                AttributeBegin '
-    # passRibContent += '\n                    AttributeBegin '
-    # passRibContent += '\n                        Attribute "identifier" "string name" ["pSphereShape1"]'
-    # passRibContent += '\n                        Attribute "identifier" "float id" [8]'
-    # passRibContent += '\n                        Sides 2'
-    # passRibContent += '\n                        ShadingInterpolation "smooth"'
-    # passRibContent += '\n                        Attribute "user" "int receivesShadows" [1]'
-    # passRibContent += '\n                        Attribute "visibility" "int camera" [1] "int indirect" [1] "int transmission" [1]'
-    # passRibContent += '\n                        Attribute "shade" "string transmissionhitmode" ["shader"]'
-    # passRibContent += '\n                        Attribute "grouping" "string membership" ["+reflection,refraction,shadow"]'
-    # passRibContent += '\n                        ##RLF Inject SurfaceShading -attribute sets@,PxrDisney1SG1,'
-    # passRibContent += '\n                        TransformBegin '
-    # passRibContent += '\n                            Procedural2 "DelayedReadArchive2" "SimpleBound" "string filename" ["%s"] "float[6] bound" [-1 1 -1 1 -1 1] "int __immediatesubdivide" [0]' %(meshPath)
-    # passRibContent += '\n                        TransformEnd '
-    # passRibContent += '\n                    AttributeEnd '
-    # passRibContent += '\n                AttributeEnd '
-    # passRibContent += '\n            AttributeEnd '
-
 
     passRibContent += '\n            ##RLF ScopeEnd -name %s' %(sceneName)
     passRibContent += '\n        WorldEnd '
@@ -403,12 +380,7 @@ def writeRibPass( args, frame ):
 
 def launchRender( args ):
     """launch a render with rib export and execution of an alf file"""
-    '@parameter path (string) Path of the environement.'
-    '@parameter sceneName (string) Name of the scene.'
-    '@parameter passName (string) Name of the pass.'
-    '@parameter frames (array of int) Frames to render.'
-    '@parameter displayType (int) Type id of the display (0:render, 1:preview).'
-    '@parameter shadingSettings (dict) Settings of the shading.'
+    '@parameter args (dict) All arguments for the render.'
 
     # args = {
     #         'globals' : {
