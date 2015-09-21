@@ -36,11 +36,36 @@ def ribJob( path, sceneName ):
     jobRibContent += '\nOption "searchpath" "string texture"  ["${RMSPROJ}:${RMSTREE}/lib/textures/:@"]'
     jobRibContent += '\nOption "searchpath" "string rixplugin"  ["${RMSTREE}/lib/shaders/:@"]'
     jobRibContent += '\nOption "searchpath" "string dirmap" [""]'
-    jobRibContent += '\nOption "searchpath" "string rifilter"  ["${RMSTREE}/lib/rif/:${RMANTREE}/etc:@"]'
     jobRibContent += '\nOption "searchpath" "string procedural"  ["${RMSTREE}/lib/plugins/:${RMSTREE}/lib/plugins:${RMANTREE}/etc:@"]'
     jobRibContent += '\n'
 
     return jobRibContent
+
+
+def objectMatch( obj, rules ):
+    """define if an object name match to a rules"""
+    '@parameter obj (str) object name.'
+    '@parameter rules (str) rules string.'
+    'return macthing object (bool)'
+
+    import re
+
+    for rule in rules.split( ';' ):
+
+        wildcard = '*'
+        if wildcard in rule:
+            try:
+                rule = re.compile(rule)
+                if re.match( rule, obj ):
+                    return True
+            except:
+                pass
+
+        else:
+            if rule == obj:
+                return True
+
+    return False
 
 
 def ribLight( lights ):
@@ -63,10 +88,10 @@ def ribLight( lights ):
         lightRibContent += '\n                IfBegin "!defined(user:shader_bindingstrength) || $user:shader_bindingstrength <= 0" '
         lightRibContent += '\n                    ShadingRate 10'
         lightRibContent += '\n                    Surface "%s" %s ' %(value['slo'], value['settings'])
-        lightRibContent += ' "string __category" ["stdrsl_plausible,%s"] "__instanceid" ["%s_0"]' %(key, value['slo'])
+        lightRibContent += ' "__instanceid" ["%s_0"]' %(value['slo'])
         lightRibContent += '\n                    ShadingRate 10'
         lightRibContent += '\n                    AreaLightSource "%s" "%s" %s' %(value['slo'], key, value['settings'])
-        lightRibContent += ' "string __category" ["stdrsl_plausible,%s"] "__instanceid" ["%s_0"]' %(key, value['slo'])
+        lightRibContent += ' "__instanceid" ["%s_0"]' %(value['slo'])
         lightRibContent += '\n                    Attribute "user" "int shader_bindingstrength" [0]'
         lightRibContent += '\n                IfEnd '
         lightRibContent += '\n                Attribute "visibility" "int camera" [0]'
@@ -98,25 +123,102 @@ def ribLight( lights ):
     return lightRibContent
 
 
-def ribGeometry( geometries ):
+def ribAttribute( geometry, attributes ):
+    """define rib Attribute content for a geometry"""
+    '@parameter geometry (str) geometry name.'
+    '@parameter attributes (list) attributes data.'
+    'return ribAttribute content (string)'
+
+    attributeRibContent = ''
+
+    check_matte = False
+    check_side = False
+    check_visibilityCamera = False
+    check_visibilityTransmission = False
+    check_visibilityIndirect = False
+    check_traceMaxdiffusedepth = False
+    check_traceMaxspeculardepth = False
+
+    for attribute in attributes:
+        if objectMatch( geometry, attribute['rule'] ):
+
+            # geometric
+            if not check_matte and attribute['m_matte_int']:
+                attributeRibContent += '\n                Matte %s' %(attribute['m_matte_int'])
+                check_matte = True
+
+            if not check_side and attribute['m_side_int']:
+                attributeRibContent += '\n                Sides %s' %(attribute['m_side_int'])
+                check_side = True
+
+
+            # visibility
+            if not check_visibilityCamera and attribute['m_visibility_camera_int']:
+                attributeRibContent += '\n                Attribute "visibility" "int camera" [%s]' %(attribute['m_visibility_camera_int'])
+                check_visibilityCamera = True
+
+            if not check_visibilityTransmission and attribute['m_visibility_transmission_int']:
+                attributeRibContent += '\n                Attribute "visibility" "int transmission" [%s]' %(attribute['m_visibility_transmission_int'])
+                check_visibilityTransmission = True
+
+            if not check_visibilityIndirect and attribute['m_visibility_indirect_int']:
+                attributeRibContent += '\n                Attribute "visibility" "int indirect" [%s]' %(attribute['m_visibility_indirect_int'])
+                check_visibilityIndirect = True
+
+
+            # trace
+            if not check_traceMaxdiffusedepth and attribute['m_trace_maxdiffusedepth_int']:
+                attributeRibContent += '\n                Attribute "trace" "int maxdiffusedepth" [%s]' %(attribute['m_trace_maxdiffusedepth_int'])
+                check_traceMaxdiffusedepth = True
+
+            if not check_traceMaxspeculardepth and attribute['m_trace_maxspeculardepth_int']:
+                attributeRibContent += '\n                Attribute "trace" "int maxspeculardepth" [%s]' %(attribute['m_trace_maxspeculardepth_int'])
+                check_traceMaxspeculardepth = True
+
+    return attributeRibContent
+
+
+def ribShading( geometry, shaders ):
+    """define rib Shading content for a geometry"""
+    '@parameter geometry (str) geometry name.'
+    '@parameter shaders (list) shaders data.'
+    'return rib Shading content (string)'
+
+    for shader in shaders:
+        if objectMatch( geometry, shader['rule'] ):
+            return '\n            %s' %( shader['value'] )
+
+    return ''
+
+
+def ribGeometry( geometries, rlf ):
     """define rib geometry content"""
     '@parameter geometries (dict) geometries data.'
-    'return ribLight content (string)'
+    '@parameter rlf (dict) rlf data both shaders and attributes.'
+    'return ribGeometry content (string)'
 
-    geometryRibContent = ''
+    # default shader
+    geometryRibContent = '        Bxdf "PxrConstant" "unassigned" "color emitColor" [1.0 0.0 1.0] "__instanceid" ["unassigned_0"]'
 
     for key, value in geometries.iteritems():
-        geometryRibContent += '\n            AttributeBegin '
-        geometryRibContent += '\n                Attribute "identifier" "string name" ["%s"]' %(key)
-        geometryRibContent += '\n                ConcatTransform %s' %(value['matrix'])
-        geometryRibContent += '\n                TransformBegin '
+        geometryRibContent += '\n        AttributeBegin '
+        geometryRibContent += '\n            Attribute "identifier" "string name" ["%s"]' %(key)
+
+        # add attributes
+        geometryRibContent += ribAttribute( key, rlf['attribute'] )
+
+        # add shader
+        geometryRibContent += ribShading( key, rlf['shading'] )
+
+        geometryRibContent += '\n            ConcatTransform %s' %(value['matrix'])
+        geometryRibContent += '\n            TransformBegin '
 
         # todo : find a good way to get the boundingbox and replace ReadArchive by Procedural2
-        geometryRibContent += '\n                ReadArchive "%s"' %(value['path'])
+        geometryRibContent += '\n            ReadArchive "%s"' %(value['path'])
         # geometryRibContent += '\n                Procedural2 "DelayedReadArchive2" "SimpleBound" "string filename" ["%s"] "float[6] bound" [-1 1 -1 1 -1 1] "int __immediatesubdivide" [0]' %(meshPath)
 
-        geometryRibContent += '\n                TransformEnd '
-        geometryRibContent += '\n            AttributeEnd '
+        geometryRibContent += '\n            TransformEnd '
+        geometryRibContent += '\n        AttributeEnd '
 
     return geometryRibContent
 
@@ -131,7 +233,7 @@ def writeAlf( path, sceneName, passName, frames, displayType ):
 
     frame = str(int(frames[0])).zfill(4)
 
-    filePath = '%srenderman/%s/data/spool_0001.alf' %(path, sceneName)
+    filePath = '%srenderman/%s/data/spool_%s.%s.alf' %(path, sceneName, passName, frame)
     ribPath = 'renderman/%s/rib/%s/%s.%s.rib' %(sceneName, frame, passName, frame)
     outputPath = '%srenderman/%s/images/%s' %(path, sceneName, sceneName)
     itPath = 'C:/Program Files/Pixar/RenderManStudio-20.0-maya2015/bin/it'
@@ -149,7 +251,7 @@ def writeAlf( path, sceneName, passName, frames, displayType ):
 
 
     alfContent = '\n'
-    alfContent += '\nJob -title {%s} -comment {#username BC)} -dirmaps {' %(sceneName)
+    alfContent += '\nJob -title {%s_%s.%s} -comment {#username BC)} -dirmaps {' %(sceneName, passName, frame)
     alfContent += '\n    {}'
     alfContent += '\n} -envkey {rms-20.0-maya-2015 prman-20.0} -pbias 1 -crews {} -tags {} -service {} -whendone {} -whenerror {}  -serialsubtasks 1 -subtasks {'
     alfContent += '\n    Task {Frames} -serialsubtasks 1 -subtasks {'
@@ -189,41 +291,6 @@ def writeRibFrame( path, sceneName, passName, frame ):
     frameRibContent += '\nReadArchive "renderman/%s/rib/%s/%s.%s.rib"' %( sceneName, frame, passName, frame )
 
     Forge.core.System.setFile( path=filePath, content=frameRibContent)
-
-
-def writeRlf( path, sceneName, passName, frame, shadingSettings ):
-    """write a rlf file"""
-    '@parameter path (string) Path of the environement.'
-    '@parameter sceneName (string) Name of the scene.'
-    '@parameter passName (string) Name of the pass.'
-    '@parameter frame (string) Frame to render.'
-    '@parameter shadingSettings (dict) Settings of the shading.'
-
-    filePath = '%srenderman/%s/rib/%s/%s.%s.rlf' %(path, sceneName, frame, passName, frame)
-    material = shadingSettings['shading'][ shadingSettings['shading'].keys()[0] ]['value']
-
-    passRlfContent = '<?xml version="1.0" encoding="ISO-8859-1"?>'
-    passRlfContent += '\n<RenderManLookFile Version="1" Format="RenderMan Look Data" AssemblyName="%s">' %(passName)
-    passRlfContent += '\n    <RuleSet>'
-    passRlfContent += '\n        <Rule FlowControl="0" MatchPhase="0" MatchMethod="3" Id="PxrDisney1SG1"><![CDATA[//*]]></Rule>'
-    passRlfContent += '\n    </RuleSet>'
-    passRlfContent += '\n    <InjectablePayloads>'
-    passRlfContent += '\n        <Payload Id="PxrDisney1SG1" Label="" Source="1" Content="1"><![CDATA[##RenderMan RIB'
-    passRlfContent += '\nversion 3.04'
-    passRlfContent += '\nIfBegin "!defined(user:shader_bindingstrength) || $user:shader_bindingstrength <= 0" '
-    passRlfContent += '\n    Displacement "null" '
-    passRlfContent += '\n    %s' %(material)
-    passRlfContent += '\n    VPInterior "null" '
-    passRlfContent += '\n    Interior "null" '
-    passRlfContent += '\n    Attribute "user" "int shader_bindingstrength" [0]'
-    passRlfContent += '\nIfEnd '
-    passRlfContent += '\n]]></Payload>'
-    passRlfContent += '\n    </InjectablePayloads>'
-    passRlfContent += '\n</RenderManLookFile>'
-    passRlfContent += '\n'
-
-
-    Forge.core.System.setFile( path=filePath, content=passRlfContent)
 
 
 def writeRibPass( args, frame ):
@@ -274,12 +341,13 @@ def writeRibPass( args, frame ):
 
     lightPath = '%srenderman/_lib/shaders/areaLight' %(path)
     statPath = '%srenderman/%s/log/%s.%s.xml' %(path, sceneName, passName, frame)
-    outputPath = '%srenderman/%s/images/%s' %(path, sceneName, sceneName)
+    outputPath = '%srenderman/%s/images/%s_%s.%s' %(path, sceneName, sceneName, passName, frame)
     meshPath = objectSettings[ objectSettings.keys()[0] ]['path']
 
 
     if displayType == 0:
         display =  'Display "%s.exr" "openexr" "rgba" ' %(outputPath)
+        display += '"string autocrop" ["true"] "string exrcompression" ["zip"] "string exrpixeltype" ["float"] '
         display += '"string filter" ["%s"] "float[2] filterwidth" [%i %i] ' %(Filter, filterwidth[0], filterwidth[1])
         display += '"int[4] quantize" [0 0 0 0] "float dither" [0] '
         display += '"float[2] exposure" [1 1] "float[3] remap" [0 0 0]'
@@ -300,7 +368,6 @@ def writeRibPass( args, frame ):
 
     passRibContent = '\nversion 3.04'
     passRibContent += ribJob(path, sceneName)
-    passRibContent += '##rifcontrol insert begin -rif RLFInjector -rifend'
     passRibContent += '\nFrameBegin 1'
     passRibContent += '\n    Identity '
     passRibContent += '\n    Option "user" "string pass_id" ["%s"] "string pass_phase" ["/Job/Frames/Images"] "string pass_class" ["Final"] "string pass_flavor" [""] "string pass_crew" [""] "string pass_camera_name" ["%s"] "string pass_camera_flavor" [""] "string pass_layer" ["defaultRenderLayer"] "string renderer" ["RIS"] "int pass_features_trace" [1] "int input_color_profile" [0]' %(passName, pass_camera_name)
@@ -344,18 +411,16 @@ def writeRibPass( args, frame ):
     passRibContent += '\n    Camera "world" "float[2] shutteropening" [0 1]'
     passRibContent += '\n    Option "user" "color camera_bg" [0 0 0] "float camera_bga" [0]'
     passRibContent += '\n    Imager "background" "color color" [0 0 0] "float alpha" [0]'
-    passRibContent += '\n    ResourceBegin '
-    passRibContent += '\n        WorldBegin '
-    passRibContent += '\n            ##RLF ScopeBegin -name %s -localbinding 1' %(sceneName)
-    passRibContent += '\n            ScopedCoordinateSystem "world_ref"'
-    passRibContent += '\n            Attribute "visibility" "int transmission" [1] "int indirect" [1]'
-    passRibContent += '\n            Bxdf "PxrDiffuse" "default" '
-    passRibContent += '\n            Attribute "user" "int shader_bindingstrength" [0]'
-    passRibContent += '\n            Attribute "trace" "int maxdiffusedepth" [%s] "int maxspeculardepth" [%s] "int samplemotion" [1] "float autobias" [1] "float bias" [0.001] "int displacements" [1]' %(maxdiffusedepth, maxspeculardepth)
-    passRibContent += '\n            Attribute "dice" "string referencecamera" ["worldcamera"]'
-    passRibContent += '\n            ShadingRate 1'
-    passRibContent += '\n            Attribute "displacementbound" "string coordinatesystem" ["shader"] "float sphere" [0]'
-    passRibContent += '\n            Attribute "photon" "string causticmap" [""] "string globalmap" [""]'
+    passRibContent += '\n    WorldBegin '
+    passRibContent += '\n        ScopedCoordinateSystem "world_ref"'
+    passRibContent += '\n        Attribute "visibility" "int transmission" [1] "int indirect" [1]'
+    passRibContent += '\n        Bxdf "PxrDiffuse" "default" '
+    passRibContent += '\n        Attribute "user" "int shader_bindingstrength" [0]'
+    passRibContent += '\n        Attribute "trace" "int maxdiffusedepth" [%s] "int maxspeculardepth" [%s] "int samplemotion" [1] "float autobias" [1] "float bias" [0.001] "int displacements" [1]' %(maxdiffusedepth, maxspeculardepth)
+    passRibContent += '\n        Attribute "dice" "string referencecamera" ["worldcamera"]'
+    passRibContent += '\n        ShadingRate 1'
+    passRibContent += '\n        Attribute "displacementbound" "string coordinatesystem" ["shader"] "float sphere" [0]'
+    passRibContent += '\n        Attribute "photon" "string causticmap" [""] "string globalmap" [""]'
 
     # lights
     passRibContent += '\n'
@@ -364,14 +429,11 @@ def writeRibPass( args, frame ):
 
     # geometry
     passRibContent += '\n'
-    passRibContent += ribGeometry( args['data']['object'] )
+    passRibContent += ribGeometry( args['data']['object'], args['rlf'] )
     passRibContent += '\n'
 
 
-    passRibContent += '\n            ##RLF ScopeEnd -name %s' %(sceneName)
-    passRibContent += '\n        WorldEnd '
-    passRibContent += '\n    ResourceEnd '
-    passRibContent += '\n    ##streammarker 2'
+    passRibContent += '\n    WorldEnd '
     passRibContent += '\nFrameEnd '
     passRibContent += '\n'
 
@@ -416,7 +478,6 @@ def launchRender( args ):
     for frame in varGlob['frames']:
         frame = str( int(varGlob['frames'][0]) ).zfill(4)
         writeRibFrame( varGlob['path'], varGlob['sceneName'], varGlob['passName'], frame )
-        writeRlf( varGlob['path'], varGlob['sceneName'], varGlob['passName'], frame, args['rlf'] )
         writeRibPass( args, frame )
 
     # launch render
