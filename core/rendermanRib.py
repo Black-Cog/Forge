@@ -307,8 +307,9 @@ def writeRibPass( args, frame ):
     objectSettings = args['data']['object']
     cameraSettings = args['data']['camera']
 
-    Filter             = args['globals']['settings']['display']['filter']
+    filtername         = args['globals']['settings']['display']['filter']
     filterwidth        = args['globals']['settings']['display']['filterwidth']
+    channels           = args['globals']['settings']['display']['channels']
 
     order              = args['globals']['settings']['render']['order']
     minwidth           = str( args['globals']['settings']['render']['minwidth'] )
@@ -341,27 +342,38 @@ def writeRibPass( args, frame ):
 
     lightPath = '%srenderman/_lib/shaders/areaLight' %(path)
     statPath = '%srenderman/%s/log/%s.%s.xml' %(path, sceneName, passName, frame)
-    outputPath = '%srenderman/%s/images/%s_%s.%s' %(path, sceneName, sceneName, passName, frame)
+    outputPath = '%srenderman/%s/images/%s' %(path, sceneName, passName)
     meshPath = objectSettings[ objectSettings.keys()[0] ]['path']
 
 
-    if displayType == 0:
-        display =  'Display "%s.exr" "openexr" "rgba" ' %(outputPath)
-        display += '"string autocrop" ["true"] "string exrcompression" ["zip"] "string exrpixeltype" ["float"] '
-        display += '"string filter" ["%s"] "float[2] filterwidth" [%i %i] ' %(Filter, filterwidth[0], filterwidth[1])
-        display += '"int[4] quantize" [0 0 0 0] "float dither" [0] '
-        display += '"float[2] exposure" [1 1] "float[3] remap" [0 0 0]'
-    elif displayType == 1:
-        display = 'Display "' + outputPath + '" "it" "rgba" '
-        display += '"string filter" ["%s"] "float[2] filterwidth" [%i %i] ' %(Filter, filterwidth[0], filterwidth[1])
-        display += '"int[4] quantize" [0 0 0 0] "float dither" [0] '
-        display += '"float[2] exposure" [1 1] "float[3] remap" [0 0 0] '
-        display += '"int merge" [0] "string connection" ["-launchURI %s"] ' %(itPath)
-        display += '"string dspyParams" [" itOpenHandler {::ice::startTimer;};;; '
-        display += 'itCloseHandler {::ice::endTimer %arglist; };;; '
-        display += 'dspyRender -renderer preview -time 1 -crop 0 1 0 1 '
-        display += '-port 53781 -context \\"%s\\" ' %(outputPath)
-        display += '-notes \\"(Date : \\nPxrPathTracer  MaxSamples :   Mode :   Light :   Bsdf :   Indir : \\""]'
+    display = ''
+    toggle = ''
+    for channel in channels:
+        if toggle:
+            display += '\n    DisplayChannel "%s"' %(channel['name'])
+            if channel['lpe']:
+                display += ' "string source" ["color lpe:%s"]' %(channel['lpe'])
+
+        if displayType == 0:
+            display += '\n    Display "%s%s_%s.%s.exr" "openexr" "%s" ' %(toggle, outputPath, channel['label'], frame, channel['name'].split(' ')[-1])
+            display += '"string autocrop" ["true"] "string exrcompression" ["zip"] "string exrpixeltype" ["%s"] ' %(channel['type'])
+            display += '"string filter" ["%s"] "float[2] filterwidth" [%i %i] ' %(filtername, filterwidth[0], filterwidth[1])
+            display += '"int[4] quantize" [0 0 0 0] "float dither" [0] '
+            display += '"float[2] exposure" [1 1] "float[3] remap" [0 0 0]'
+        elif displayType == 1:
+            display += '\n    Display "%s%s_%s.%s" "it" "%s" ' %(toggle, outputPath, channel['label'], frame, channel['name'].split(' ')[-1])
+            display += '"string filter" ["%s"] "float[2] filterwidth" [%i %i] ' %(filtername, filterwidth[0], filterwidth[1])
+            display += '"int[4] quantize" [0 0 0 0] "float dither" [0] '
+            display += '"float[2] exposure" [1 1] "float[3] remap" [0 0 0] '
+            display += '"int merge" [0] "string connection" ["-launchURI %s"] ' %(itPath)
+            if not toggle:
+                display += '"string dspyParams" [" itOpenHandler {::ice::startTimer;};;; '
+                display += 'itCloseHandler {::ice::endTimer %arglist; };;; '
+                display += 'dspyRender -renderer preview -time 1 -crop 0 1 0 1 '
+                display += '-port 53781 -context \\"%s\\" ' %(outputPath)
+                display += '-notes \\"(Date : \\nPxrPathTracer  MaxSamples :   Mode :   Light :   Bsdf :   Indir : \\""]'
+
+        toggle = '+'
 
 
     filePath = '%srenderman/%s/rib/%s/%s.%s.rib' %(path, sceneName, frame, passName, frame)
@@ -392,7 +404,7 @@ def writeRibPass( args, frame ):
     passRibContent += '\n    Hider "raytrace" "int adaptall" [0] "string integrationmode" ["path"] "int incremental" [1] "string pixelfiltermode" ["weighted"] "int minsamples" [%s] "int maxsamples" [%s]' %(minsamples, maxsamples)
     passRibContent += '\n    Integrator "PxrPathTracer" "PxrPathTracer" "int maxPathLength" [%s] "string sampleMode" ["bxdf"] "int numLightSamples" [%s] "int numBxdfSamples" [%s] "int numIndirectSamples" [%s] "int numDiffuseSamples" [1] "int numSpecularSamples" [1] "int numSubsurfaceSamples" [1] "int numRefractionSamples" [1] "int rouletteDepth" [4] "float rouletteThreshold" [0.2] "string imagePlaneSubset" ["rman__imageplane"] "int clampDepth" [2] "float clampLuminance" [10] "int allowCaustics" [%s]' %(maxPathLength, numLightSamples, numBxdfSamples, numIndirectSamples, allowCaustics)
     passRibContent += '\n    Format %s' %(Format)
-    passRibContent += '\n    %s' %(display)
+    passRibContent += '\n%s' %(display)
     passRibContent += '\n    Clipping %s' %(camera_clipping)
     passRibContent += '\n    Projection "perspective" "fov" [%s]' %(camera_fov)
 
